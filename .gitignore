@@ -1,3 +1,8 @@
+# Scala
+bin
+target
+.cache-main
+
 # Javascript/Angular2
 webapp/node_modules/
 webapp/typings/
