@@ -1,0 +1,21 @@
+# Javascript/Angular2
+webapp/node_modules/
+webapp/typings/
+
+# TypeScript generated files
+webapp/*.js
+webapp/**/*.js
+
+# OS
+.DS_Store
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Google App Engine generated folder
+appengine-generated/
+webapp/WEB-INF/classes/
+webapp/WEB-INF/lib/
+
