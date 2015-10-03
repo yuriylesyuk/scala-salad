@@ -1,0 +1,16 @@
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" version="2.5">
+	<filter>
+		<filter-name>LiftFilter</filter-name>
+		<display-name>List Filter</display-name>
+		<description>the filter that intercepts lift calls</description>
+		<filter-class>net.liftweb.http.LiftFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>LiftFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+	<static-files>
+		<include path="/favicon.ico"/>
+	</static-files>
+</web-app>
