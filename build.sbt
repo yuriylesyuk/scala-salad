@@ -6,6 +6,8 @@ scalaVersion := "2.11.6"
 
 scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 
+EclipseKeys.withSource := true
+
 libraryDependencies ++= Seq(
 	"com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
 

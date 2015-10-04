@@ -4,7 +4,7 @@ import net.liftweb._
 import http._
 
 import provider.HTTPParam
-import salad.intro.server.LiftRest
+import salad.intro.server.ArgonautRest
 
 class Boot {
   def boot{
@@ -18,6 +18,6 @@ class Boot {
         HTTPParam("Access-Control-Allow-Headers", "WWW-Authenticate,Keep-Alive,User-Agent,X-Requested-With,Cache-Control,Content-Type")
       ))
       
-    LiftRest.init()
+    ArgonautRest.init()
     }
 }
