@@ -12,4 +12,11 @@ object ArgonautUsers extends App{
   val usersJson = users.asJson
   
   println( usersJson )
+  
+  // parse the Users Vector as a Json string
+  val usersJsonString = usersJson.toString
+  
+  val parsedUsers = usersJsonString.decodeOption[Vector[Users]].getOrElse(Nil)
+  
+  println( parsedUsers )
 }
