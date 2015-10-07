@@ -4,6 +4,13 @@
 
 import {bootstrap, Component, View} from "angular2/angular2";
 
+class User {
+	id: number;
+	name: string;
+	age: number;
+	role: string;		
+}
+
 @Component({
 	selector: 'users-app'
 })
@@ -12,9 +19,13 @@ import {bootstrap, Component, View} from "angular2/angular2";
 })
 class UsersComponent {
 	name: string;
+	users: [User];
+	
 	
 	constructor() {
 		this.name = 'James';
+		
+		this.users ='[{"id":1,"name":"Janes","age":25,"position":"Developer"},{"id":1,"name":"Watson","age":25,"position":"Manager"}]'
 	}
 }
 

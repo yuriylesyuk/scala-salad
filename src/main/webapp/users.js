@@ -13,9 +13,15 @@ if (typeof __metadata !== "function") __metadata = function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var angular2_1 = require("angular2/angular2");
+var User = (function () {
+    function User() {
+    }
+    return User;
+})();
 var UsersComponent = (function () {
     function UsersComponent() {
         this.name = 'James';
+        this.users = '[{"id":1,"name":"Janes","age":25,"position":"Developer"},{"id":1,"name":"Watson","age":25,"position":"Manager"}]';
     }
     UsersComponent = __decorate([
         angular2_1.Component({
