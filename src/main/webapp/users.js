@@ -1,7 +1,4 @@
-/// <reference path="typings/angular2/angular2.d.ts"/>
-/// <reference path="typings/es6-shim/es6-shim.d.ts"/>
-/// <reference path="typings/es6-promise/es6-promise.d.ts"/>
-if (typeof __decorate !== "function") __decorate = function (decorators, target, key, desc) {
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") return Reflect.decorate(decorators, target, key, desc);
     switch (arguments.length) {
         case 2: return decorators.reduceRight(function(o, d) { return (d && d(o)) || o; }, target);
@@ -9,29 +6,51 @@ if (typeof __decorate !== "function") __decorate = function (decorators, target,
         case 4: return decorators.reduceRight(function(o, d) { return (d && d(target, key, o)) || o; }, desc);
     }
 };
-if (typeof __metadata !== "function") __metadata = function (k, v) {
+var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var angular2_1 = require("angular2/angular2");
+var http_1 = require('angular2/http');
+var usersservice_1 = require('usersservice');
 var User = (function () {
-    function User() {
+    function User(userData) {
+        this.id = userData.id;
+        this.name = userData.name;
+        this.age = userData.age;
+        this.role = userData.role;
     }
     return User;
 })();
+exports.User = User;
 var UsersComponent = (function () {
-    function UsersComponent() {
+    function UsersComponent(fb, usersAPI) {
+        var _this = this;
         this.name = 'James';
-        this.users = '[{"id":1,"name":"Janes","age":25,"position":"Developer"},{"id":1,"name":"Watson","age":25,"position":"Manager"}]';
+        // '[{"id":1,"name":"Janes","age":25,"position":"Developer"},{"id":1,"name":"Watson","age":25,"position":"Manager"}]'
+        usersAPI.getUsers().then(function (users) {
+            _this.users = users;
+        });
+        //this.users = [new User({id:3,name:"xx", age:5, role:"xx"})];
+        this.form = fb.group({
+            name: [this.name],
+            users: [this.users]
+        });
     }
+    UsersComponent.prototype.onSubmit = function (value) {
+        console.log('value: ', value);
+    };
     UsersComponent = __decorate([
         angular2_1.Component({
-            selector: 'users-app'
+            selector: 'users-app',
         }),
         angular2_1.View({
-            template: '<h1>Hello {{name}}</h1'
+            templateUrl: 'users.html',
+            directives: [angular2_1.FORM_DIRECTIVES, angular2_1.NgFor]
         }), 
-        __metadata('design:paramtypes', [])
+        __metadata('design:paramtypes', [angular2_1.FormBuilder, (typeof (_a = typeof usersservice_1.UsersAPI !== 'undefined' && usersservice_1.UsersAPI) === 'function' && _a) || Object])
     ], UsersComponent);
     return UsersComponent;
+    var _a;
 })();
-angular2_1.bootstrap(UsersComponent);
+exports.UsersComponent = UsersComponent;
+angular2_1.bootstrap(UsersComponent, [http_1.HTTP_BINDINGS, usersservice_1.UsersAPI]);

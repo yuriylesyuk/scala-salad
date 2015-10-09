@@ -1,32 +1,55 @@
-/// <reference path="typings/angular2/angular2.d.ts"/>
-/// <reference path="typings/es6-shim/es6-shim.d.ts"/>
-/// <reference path="typings/es6-promise/es6-promise.d.ts"/>
+import {bootstrap, Component, View,
+	FormBuilder, Directive,
+	FORM_DIRECTIVES, NgFormModel, NgIf, NgFor} from "angular2/angular2";
+import {HTTP_BINDINGS} from 'angular2/http';	
+import {UsersAPI} from 'usersservice';
 
-import {bootstrap, Component, View} from "angular2/angular2";
-
-class User {
+export class User {
 	id: number;
 	name: string;
 	age: number;
-	role: string;		
+	role: string;
+
+	constructor(userData: any){
+		this.id = userData.id;
+		this.name = userData.name;
+		this.age = userData.age;
+		this.role = userData.role;
+	}	
 }
 
 @Component({
-	selector: 'users-app'
+	selector: 'users-app',
 })
 @View({
-	template: '<h1>Hello {{name}}</h1'
+	templateUrl: 'users.html',
+	directives: [FORM_DIRECTIVES, NgFor]
 })
-class UsersComponent {
+export class UsersComponent {
 	name: string;
-	users: [User];
+	users: Array<User>;
+	
+	form: ng.ControlGroup;
 	
 	
-	constructor() {
+	constructor(fb: FormBuilder, usersAPI: UsersAPI ) {
 		this.name = 'James';
 		
-		this.users ='[{"id":1,"name":"Janes","age":25,"position":"Developer"},{"id":1,"name":"Watson","age":25,"position":"Manager"}]'
+		// '[{"id":1,"name":"Janes","age":25,"position":"Developer"},{"id":1,"name":"Watson","age":25,"position":"Manager"}]'
+		usersAPI.getUsers().then((users)=>{
+			this.users = users;
+		})
+		//this.users = [new User({id:3,name:"xx", age:5, role:"xx"})];
+		
+		this.form = fb.group({
+			name: [this.name],
+			users: [this.users]
+		})
+	}
+	
+	onSubmit(value){
+		console.log('value: ',value);
 	}
 }
 
-bootstrap(UsersComponent)
+bootstrap(UsersComponent, [HTTP_BINDINGS,UsersAPI])

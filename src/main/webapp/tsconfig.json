@@ -2,11 +2,15 @@
 	"compilerOptions": {
 		"emitDecoratorMetadata": true,
 		"module": "commonjs",
-		"target": "es5"
+		"target": "es5",
+		"experimentalDecorators": true
 	},
 	"files": [
+		"xx.ts",
+		"users.ts",
+		"usersservice.ts",
 		"typings/angular2/angular2.d.ts",
-		"typings/es6-promise/es6-promise",
-		"users.ts"
-	]
+		"typings/angular2/router.d.ts",
+		"typings/tsd.d.ts"
+	]	
 }

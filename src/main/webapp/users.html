@@ -1,0 +1,21 @@
+<div>
+<h1>Users {{name}}</h1>	
+<form (ng-submit)="onSubmit(form.value)" [ng-form-model]="form" #f="form">
+	<div class="form-group">
+		<label for="name">Name
+			<input type="text" class="form-control" #name="form" ng-control="name"></input>
+		</label>
+		
+		<label for="name">Name
+			<input type="text" class="form-control" #name="form" [ng-form-control]="form.controls['users']"></input>
+		</label>
+	</div>
+	<div class="form-group">
+		<li *ng-for="#user of users">
+			{{user.name}}| {{user.age}} |  {{user.role}}			
+		</li>
+	</div>
+	
+	<button type="submit">Submit</button>
+</form>
+</div>

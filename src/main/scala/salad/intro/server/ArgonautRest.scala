@@ -42,7 +42,10 @@ object ArgonautRest extends RestHelper with LazyLogging{
 
         ArgonautResponse( users.asJson )
       }
-    //case "users" :: Nil JsonGet req => JsonResponse( decompose( Users(1,"J", 15, "D") ))
+      case "users" :: Nil Get req => ArgonautResponse( Vector(
+          Users(1, "Janes", 25, "Developer"),
+          Users(1, "Watson", 25, "Manager")
+        ).asJson )
   })
   
   def init(): Unit = {
