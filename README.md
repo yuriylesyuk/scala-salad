@@ -1,4 +1,16 @@
-# Scala SALAD Walkthrough
+Scala SALAD
+===========
+
+SALAD: 
+Slick
+Argonaut
+Lift
+Angular
+Derby
+
+The project is meant to be a step-by-step-no-steps-missed walkthrough to create a generic but useful setup for multi-tier web-based Scala application, using  Derby as a database backend, Slick as an FRM toolkit and argonaut as a Json processor. 
+
+# Walkthrough
 
 ## Define `SALAD_HOME`
 
@@ -229,7 +241,7 @@ mkdir $SALAD_HOME/_downloads
     insert into users values (1, 'Jones', 25, 'Developer');
 	insert into users values (2, 'Watson', 27, 'Manager');
     ```
-1. In the `SickDerby.scala` add `SlickDerbySelectRecords` object
+    In the `SickDerby.scala` add `SlickDerbySelectRecords` object
     ```scala
     object SlickDerbySelectRecords extends App {
   	  val db = Database.forConfig("test-db")
@@ -241,7 +253,7 @@ mkdir $SALAD_HOME/_downloads
   	val future = db.run(actions).map { _ foreach println }
   	Await.result( future, 2 seconds)
 	}
-	```
+    ```
     The output should look like
     ```
     ResultSet:
