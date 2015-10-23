@@ -210,16 +210,20 @@ mkdir $SALAD_HOME/_downloads
 1. Execute `connect 'jdbc:derby://localhost:1527/test-db;';`
 1. Execute create table statement. Don't forget ; at the end.
 1. Run `describe users;` to display newly created table.
-	```
+
+	```bash
 	ij> describe users;
-	COLUMN_NAME|TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&	
-    ------------------------------------------------------------------------	
-    ID                  |INTEGER  |0   |10  |10    |GENERATED&|NULL      |NO  
-    NAME                |VARCHAR  |NULL|NULL|254   |NULL      |508       |NO  
-    AGE                 |INTEGER  |0   |10  |10    |NULL      |NULL      |NO  
-    ROLE                |VARCHAR  |NULL|NULL|254   |NULL      |508       |NO  
+	```	
+
+ 	| COLUMN_NAME | TYPE_NAME | DEC& | NUM& | COLUM& | COLUMN_DEF | CHAR_OCTE& | IS_NULL&	|
+	| ----------- | ------- | -------- | --------- | ----------- | ------------| ------- | -----|
+ 	| ID                  | INTEGER  | 0   | 10  | 10    | GENERATED& | NULL      | NO  |
+    | NAME                |VARCHAR  |NULL|NULL|254   |NULL      |508       |NO  |
+    | AGE                 |INTEGER  |0   |10  |10    |NULL      |NULL      |NO  |
+    | ROLE                |VARCHAR  |NULL|NULL|254   |NULL      |508       |NO  |
+    
     4 rows selected
-    ```
+    
 1. Execute `insert table` statements
 	```
     insert into users values (1, 'Jones', 25, 'Developer');
