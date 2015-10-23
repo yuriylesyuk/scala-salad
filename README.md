@@ -225,12 +225,12 @@ mkdir $SALAD_HOME/_downloads
     4 rows selected
     
 1. Execute `insert table` statements
-	```
+    ```
     insert into users values (1, 'Jones', 25, 'Developer');
 	insert into users values (2, 'Watson', 27, 'Manager');
     ```
 1. In the `SickDerby.scala` add `SlickDerbySelectRecords` object
-	```scala
+    ```scala
     object SlickDerbySelectRecords extends App {
   	  val db = Database.forConfig("test-db")
   	  val users = TableQuery[UsersTable]
@@ -247,6 +247,61 @@ mkdir $SALAD_HOME/_downloads
     ResultSet:
 	Users(1,Jones,25,Developer)
 	Users(2,Watson,27,Manager)
+    ```
+
+# Argonaut
+
+1. Add dependency to the `build.sbt`
+	```scala
+    "io.argonaut" %% "argonaut" % "6.0.4"
+ 	```
+1. On sbt prompt execute `reload` and `eclipse` commands. Refresh Eclipse workspace.
+
+1. Refactor users case class from `SlickDerby.scala` into separate file Users.scala. 
+   Add implicit casecodec for the JSON generator. `Users.scala`:
+   ```scala
+   package salad.intro
+
+	import scalaz._, Scalaz._
+	import argonaut._, Argonaut._
+
+	case class Users(id: Int, name: String, age: Int, role: String)
+
+	object Users {
+	  implicit def UsersCodecJson: CodecJson[Users] =
+	    casecodec4(Users.apply, Users.unapply)("id","name","age","role")
+	}
+	```
+
+1. In the `scala.intro` package, create `ArgonautUser.scala` file
+	```scala
+    package scala.intro
+
+	import scalaz._, Scalaz._
+	import argonaut._, Argonaut._
+
+	object ArgonautUsers extends App{
+	  val users = Vector(
+	        Users(1, "Janes", 25, "Developer"),
+	        Users(1, "Watson", 25, "Manager")
+	      )
+  
+	  val usersJson = users.asJson
+  
+	  println( usersJson )
+  
+	  // parse the Users Vector as a Json string
+	  val usersJsonString = usersJson.toString
+  
+	  val parsedUsers = usersJsonString.decodeOption[Vector[Users]].getOrElse(Nil)
+  
+	  println( parsedUsers )
+	}
+    ```
+1. Execute ArgonautUsers object. The output should be
+	```json
+    [{"id":1,"name":"Janes","age":25,"role":"Developer"},{"id":1,"name":"Watson","age":25,"role":"Manager"}]
+Vector(Users(1,Janes,25,Developer), Users(1,Watson,25,Manager))
     ```
 
 
