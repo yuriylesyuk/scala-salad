@@ -29,6 +29,8 @@ Add previous command to it.
 mkdir $SALAD_HOME/_downloads
 ```
 
+
+
 ## Install Jetty
 
 1. Download .zip file from http://download.eclipse.org/jetty/ into 	`$SALAD_HOME/_downloads`.
@@ -38,16 +40,23 @@ mkdir $SALAD_HOME/_downloads
 	```
 1. Export JETTY_HOME environment variable
 	```bash
-	export JETTY_HOME=$SALAD_HOME/jetty-distribution-9.3.3.v20151-12
+	export JETTY_HOME=$SALAD_HOME/jetty-distribution-9.3.5.v20151012
 	```
 1. Append `JETTY_HOME/bin` to the `PATH` variable
 	```bash
     PATH=$PATH:$JETTY_HOME/bin
 	```
 **Note:** Add JETTY_HOME definition to the `saladenv.sh` file
+
+## Test Jetty Installation
+
+1. Run `java -jar $JETTY_HOME/start.jar --module=http jetty.http.port=8080` command.
+2. In a browser navigate to `http://localhost:8080/`. Observe response from the server.
+3. To exit the jetty, press `Ctrl+C`
+
 ## Install Derby DB
 
-**Note:** Open separate Terminal window for Jetty and Derby DB so you can leave their instances running in it.
+> **NOTE:** Open separate Terminal window for Derby DB so you can leave its instance running.
 
 1. Download latest Derby DB distribution `db-derby-*-bin.zip` file (i.e., `10.12.1.1`) from http://db.apache.org/derby/releases/ .cgi link into `$SALAD_HOME/_downloads`
 1. Unzip its contents into `$SALAD_HOME`
@@ -168,7 +177,7 @@ mkdir $SALAD_HOME/_downloads
 
 1. Right-click on a `src/main/scala` node and select `Create package`
 
-1. Enter scala.intro as a package name under `src/main/scala`.
+1. Enter salad.intro as a package name under `src/main/scala`.
 
 1. In the `src/main/resources` create `application.conf` file
 	```
@@ -179,9 +188,9 @@ mkdir $SALAD_HOME/_downloads
 		keepAliveConnection = true
 	}
     ```
-1. In the `scala-intro` package create Scala Object `SlickDerby.scala`
+1. In the `salad.intro` package create Scala Object `SlickDerby.scala`
 	```scala
-    package scala.intro
+    package salad.intro
 
 	import slick.driver.DerbyDriver.api._
 	import scala.concurrent.ExecutionContext.Implicits.global
@@ -285,9 +294,9 @@ mkdir $SALAD_HOME/_downloads
 	}
 	```
 
-1. In the `scala.intro` package, create `ArgonautUser.scala` file
+1. In the `salad.intro` package, create `ArgonautUser.scala` file
 	```scala
-    package scala.intro
+    package salad.intro
 
 	import scalaz._, Scalaz._
 	import argonaut._, Argonaut._
@@ -317,4 +326,134 @@ Vector(Users(1,Janes,25,Developer), Users(1,Watson,25,Manager))
     ```
 
 
+# Lift and Jetty
+
+## Setup libraries
+
+1. Add plugin dependency to the project/plugins.sbt
+	```bash
+    addSbtPlugin("com.earldouglas" % "xsbt-web-plugin" % "1.1.0")
+    ```
+1. Add scala-logging dependency
+	```bass
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0"
+    ```
+
+1. Add libraryDependencies section to the `build.sbt`
+	```bash
+	    libraryDependencies ++= {
+		val liftVersion = "2.6-RC1"
+		Seq(
+			"net.liftweb" %% "lift-webkit" % liftVersion % "compile",
+			"net.liftweb" %% "lift-json" % liftVersion % "compile"
+		)
+	}
+
+	jetty()
+	```
+    
+1. On the sbt prompt execute `reload` and `eclipse` commands. Refresh Eclipse project to load new dependencies.
+ 
+## Create simple lift project
+
+1. Open src and then main nodes in the Package Explorer. Create new folders `webapp` in `src/main` and folder WEB-INF in it.
+1. In the `WEB-INF` Create `web.xml` with following contents
+	```xml
+    <web-app xmlns="http://java.sun.com/xml/ns/javaee" version="2.5">
+		<filter>
+			<filter-name>LiftFilter</filter-name>
+			<display-name>List Filter</display-name>
+			<description>the filter that intercepts lift calls</description>
+			<filter-class>net.liftweb.http.LiftFilter</filter-class>
+		</filter>
+		<filter-mapping>
+			<filter-name>LiftFilter</filter-name>
+			<url-pattern>/*</url-pattern>
+		</filter-mapping>
+	
+		<static-files>
+			<include path="/favicon.ico"/>
+		</static-files>
+	</web-app>
+    ```
+1. In the `src/main/scala` create new package `bootstap.liftweb`
+1. Create new Lift Scala Boot class `Boot.scala`
+	```scala
+    package bootstrap.liftweb
+
+	import net.liftweb._
+	import http._
+
+	import provider.HTTPParam
+	import salad.intro.server.LiftRest
+
+	class Boot {
+	  def boot{
+    
+	    // Allow Cross-Origin Resource Sharing
+	    LiftRules.supplimentalHeaders = s => s.addHeaders(
+	      List(HTTPParam("X-Lift-Version", LiftRules.liftVersion),
+	        HTTPParam("Access-Control-Allow-Origin", "*"),
+	        HTTPParam("Access-Control-Allow-Credentials", "true"),
+	        HTTPParam("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS"),
+	        HTTPParam("Access-Control-Allow-Headers", "WWW-Authenticate,Keep-Alive,User-Agent,X-	Requested-With,Cache-Control,Content-Type")
+	      ))
+      
+	    LiftRest.init()
+	    }
+	}
+    ```
+1. Create `LiftRest.scala` in the `src/main/scala/salad.intro.server` package
+	```scala
+    package salad.intro.server
+
+	import com.typesafe.scalalogging._
+
+	import net.liftweb.http.rest.RestHelper
+	import net.liftweb.http.LiftRules
+
+	import net.liftweb.http.OkResponse
+	import net.liftweb.http.PlainTextResponse
+
+	import net.liftweb.http.JsonResponse
+	import net.liftweb.json.JsonAST._
+	import net.liftweb.json.JsonDSL._
+	import net.liftweb.json.Extraction._
+	import net.liftweb.json.Printer._
+	import net.liftweb.json.DefaultFormats
+
+	import salad.intro.Users
+
+	object LiftRest extends RestHelper with LazyLogging{
+
+	  serve ( "api" / "v1" prefix {
+	    case "ping" :: Nil JsonGet req => OkResponse()
+	    case "list" :: Nil JsonGet req => JsonResponse( ("xx"-> "A xx" ) ~ ("yy" -> "A yy" ) )
+	    case "users" :: Nil JsonGet req => JsonResponse( decompose( Users(1,"J", 15, "D") ))
+	  })
+  
+	  def init(): Unit = {
+	    LiftRules.statelessDispatch.append(LiftRest)
+	  }
+	}    
+	```
+## Deploy and Test the Application
+
+1. To generate .ware file in the sbt prompt execut `package`
+
+1. On the sbt prompt run jetty container 
+	```bash
+    container:start
+    ```
+1. In a browser navigate to `http://localhost:8080/api/v1/list`. You should see a test JSON hard-coded datagram.
+1. Navigate to `http://localhost:8080/api/v1/users`. The Lift json has generated a JSON datagram from Scala Users Object.
+1. Stop the jetty server by pressing Enter in the sbt window and entering 
+	```bash
+    container:stop
+    ```
+    
+> **NOTE:*** To reload automatically when files change, use following sbt command
+> ```bash
+> ~;container:start; container: reload /
+> ```
 
