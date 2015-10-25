@@ -437,6 +437,7 @@ Vector(Users(1,Janes,25,Developer), Users(1,Watson,25,Manager))
 	  }
 	}    
 	```
+
 ## Deploy and Test the Application
 
 1. To generate .ware file in the sbt prompt execut `package`
@@ -451,9 +452,133 @@ Vector(Users(1,Janes,25,Developer), Users(1,Watson,25,Manager))
 	```bash
     container:stop
     ```
-    
+
 > **NOTE:*** To reload automatically when files change, use following sbt command
 > ```bash
 > ~;container:start; container: reload /
 > ```
 
+## Refactor Lift JSON into Argonaut
+
+Argonaut doesn't work out of the box with the Lift. To generate http response from JSON datagram, let's create the ArgonautResponse class and object that complies with the Lift response framework. 
+
+1. Int the `argonaut.http` package, create `ArgonautResponse.scala`
+	```scala
+    package argonaut.http
+  
+ 	import net.liftweb.http.LiftResponse
+	import net.liftweb.http.InMemoryResponse
+    import net.liftweb.http.provider.HTTPCookie
+	import net.liftweb.http.S
+	import argonaut._, Argonaut._
+  
+	case class ArgonautResponse( json: Json, headers: List[(String, String)], cookies: List[HTTPCookie], code: Int ) extends LiftResponse{
+    
+    def toResponse = {
+      val bytes = json.toString.getBytes("UTF-8")
+      InMemoryResponse(bytes, ("Content-Length", bytes.length.toString) :: ("Content-Type", "application/json; charset=utf-8") :: headers, cookies, code)
+    	}
+	}
+	object ArgonautResponse {
+    	def headers: List[(String, String)] = S.getResponseHeaders(Nil)
+	    def cookies: List[HTTPCookie] = S.responseCookies
+    
+	    def apply(json: Json): LiftResponse = new ArgonautResponse(json, headers, cookies, 200)
+	}
+   ```
+
+1. In the `salad.intro.server` create `ArgonautRest.scala` so that the Argonaut responses are returned.
+
+	```scala
+	package salad.intro.server
+	
+	import com.typesafe.scalalogging._
+	
+	import net.liftweb.http.rest.RestHelper
+	import net.liftweb.http.LiftRules
+	
+	import net.liftweb.http.OkResponse
+	import net.liftweb.http.PlainTextResponse
+	
+	import salad.intro.Users
+	import argonaut.http.ArgonautResponse
+	
+	import scalaz._, Scalaz._
+	import argonaut._, Argonaut._
+	
+	object ArgonautRest extends RestHelper with LazyLogging{
+	
+	  serve ( "api" / "v1" prefix {
+	    case "ping" :: Nil JsonGet req => OkResponse()
+	    case "usersecho" :: Nil Post req => {
+	      /////
+	      // the request feeds back to the client a Vector of Users
+	      // unmarchalled and marchalled by Argonaut
+	      
+	      // ArgonautRequest() proto-hack
+	      // json body is assumed and forced
+	      // TODO: infer text charset from req.contentType
+	                
+	      // body is Array[Byte]
+	      val json = new String(req.body.get)
+	      
+	      val users: Vector[Users] = json.decodeOption[Vector[Users]].getOrElse(Vector.empty)
+	      ////
+	      // I.e.: 
+	      // [{"id":1,"name":"Janes","age":25,"role":"Developer"},{"id":1,"name":"Watson","age":25,"role":"Manager"}]
+	      // converts to:
+	      // val users = Vector(
+	      //    Users(1, "Janes", 25, "Developer"),
+	      //    Users(1, "Watson", 25, "Manager")
+	      //  ) 
+	
+	        ArgonautResponse( users.asJson )
+	      }
+	      case "users" :: Nil Get req => ArgonautResponse( Vector(
+	          Users(1, "Janes", 25, "Developer"),
+	          Users(1, "Watson", 25, "Manager")
+	        ).asJson )
+	  })
+	  
+	  def init(): Unit = {
+	    LiftRules.statelessDispatch.append(ArgonautRest)
+	  }  
+	}    
+    ```
+    
+ 1. Change `bootstrap.liftweb.Boot.scala` class to use ArgonautRest. Replace `LiftRest` by `ArgonautRest`
+
+1. On sbt prompt run `package`, then `container:start`.
+
+1. In the browser navigate to `http://localhost:8080/api/v1/users`. You should see as a result the JSON array of Users objects.
+
+    ```json
+    [{"id":1,"name":"Janes","age":25,"role":"Developer"},{"id":1,"name":"Watson","age":25,"role":"Manager"}]
+    ```
+## Using Postman to interact with REST service
+
+The Postman Google Chrome app to interact with server via JSON. We are going to use `usersecho` request to POST a user object, then use Argonaut for round-trip communication: to unmarchall it into Scala Users object and marchall it back into a JSON response.
+    
+The `/api/v1/userecho` service accepts JSON datagram, converts it into scala object using Argonaut, then sends the object, packaging it into an ArgonautResponse.
+
+1. Install [Postman](https://chrome.google.com/webstore/detail/postman/fhbjgbiflinjbdggehcddcbncdddomop?hl=en) REST Client application  from the Chrome Web Store.
+
+1. Open the Postman. Configure the POST operatin with `localhost:8080/api/v1/usersecho` URL.
+
+1. Select Row JSON request and enter 
+	```json
+    [{"id":1,"name":"Janes","age":25,"role":"Developer"}]
+    ```
+    as a request datagram.
+    
+1. Press `Send` button. You should obtain JSON response:
+	```json
+    [
+	    {
+    	    "id": 1,
+	        "name": "Janes",
+	        "age": 25,
+	        "role": "Developer"
+	    }
+	]
+    ```
