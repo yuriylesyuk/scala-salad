@@ -555,9 +555,9 @@ Argonaut doesn't work out of the box with the Lift. To generate http response fr
     ```json
     [{"id":1,"name":"Janes","age":25,"role":"Developer"},{"id":1,"name":"Watson","age":25,"role":"Manager"}]
     ```
-## Using Postman to interact with REST service
 
-The Postman Google Chrome app to interact with server via JSON. We are going to use `usersecho` request to POST a user object, then use Argonaut for round-trip communication: to unmarchall it into Scala Users object and marchall it back into a JSON response.
+## Using Postman to interact with REST service
+The Postman Google Chrome application can be used to interact with our server by sending and receiving JSON requests. We are going to use `usersecho` request to POST a user object, then use Argonaut for round-trip communication: to unmarchall it into Scala Users object and marchall it back into a JSON response.
     
 The `/api/v1/userecho` service accepts JSON datagram, converts it into scala object using Argonaut, then sends the object, packaging it into an ArgonautResponse.
 
@@ -582,3 +582,96 @@ The `/api/v1/userecho` service accepts JSON datagram, converts it into scala obj
 	    }
 	]
     ```
+
+## >>Read Records from the Database>
+
+???
+
+# Angular2 Simple Client 
+
+## Setting up Development Environment and Angular2 Project
+
+> NOTE: while working on a client application and developing angular-only code, we want to optimise edit-run cycle by using live-server.
+ 
+1. Launch VSCode and use `Open Folder` button to open `src/main/webapp` folder of the scala-salad project.
+
+1. Create `package.json` file
+	```json
+    {
+	  "name": "userscomponent",
+	  "version": "0.0.1",
+	  "dependencies": {
+	    "angular2": "2.0.0-alpha.42",
+	    "systemjs": "0.19.2"
+	  },
+	  "devDependencies": {
+	    "live-server": "latest"
+	  },
+	  "scripts": {
+	    "tsc": "tsc -p src/webapp -w",
+	    "liveserver": "live-server --no-browser --port=9090 --open=src/webapp"
+	  }
+	}
+    ``` 
+    
+1. Execute `npm install` to load dependencies and live-server.
+1. Create index.html file with `Hello, World!` contents.
+1. Execute `npm run liveserver` command to start local server on port 9090.    
+1. In a browser, navigate to localhost:9090/ URL. The `Hello, World!` page should be displayed.
+
+## Creating Simple Angular2 Application
+
+1. In the `webapp` folder create `app` folder
+1. In the `app` folder create tsconfig.json file
+	```json
+    {
+		"compilerOptions": {
+			"module": "commonjs",
+			"target": "es5",
+			"sourceMap": true,
+			"emitDecoratorMetadata": true,
+			"experimentalDecorators": true,
+			"noImplicitAny": false
+		}		
+	}
+    ```
+1. In a separate window launch `npm run tsc` command.
+
+1. Create `app/usersapp.ts` TypeScript file
+	```javascript
+    import {bootstrap,Component} from 'angular2/angular2';
+
+	@Component({
+		selector: 'users-app',
+		template: `
+			<h2>Hello, World</h2>
+		`	
+	})
+	export class UsersApp{
+		constructor(){}
+	}
+
+	bootstrap(UsersApp, []);
+    ```
+1. Edit `index.html` file
+	```html
+    <html>
+	<head>
+		<title>Users Component</title>
+     
+	    <script src="node_modules/systemjs/dist/system.src.js"></script>
+	    <script src="node_modules/angular2/bundles/angular2.js"></script>
+	
+	    <script>
+	        System.config({
+	            packages: {'app': {defaultExtension: 'js'}}
+	        });
+	        System.import('app/usersapp').catch(console.log.bind(console));
+	    </script>
+	</head>
+	<body>	
+	    <users-app></users-app>
+	</body>
+	</html>
+	```
+1. In brower refresh `localhost:9090` page. You will see `Hello World!`, but don't be fooled: this is a full-fetured Angular2 application. 
