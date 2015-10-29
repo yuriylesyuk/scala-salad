@@ -8,7 +8,11 @@ Lift
 Angular
 Derby
 
-The project is meant to be a step-by-step-no-steps-missed walkthrough to create a generic but useful setup for multi-tier web-based Scala application, using  Derby as a database backend, Slick as an FRM toolkit and argonaut as a Json processor. 
+The scala-salad project is a complete step-by-step walkthrough that defines a functionally complete set of components for a lightweight multi-tier web application.
+
+The server side exposes services using REST/JSON. Lift is the web framework, used for the stack. DerbyDB is selected as a database back-end. The code uses two JSON processing frameworks: Lift JSON and Argonaut. My experience is that lift-json is a solid piece of engineering, but Argonaut implementation is more elegant. Slick is selected as an FRM framework.
+
+The client side is written in Angular2. The important intentional decision was to use TypeScript for the client implementation, as TypeScript makes the usage of functional idioms so much easier and supports many FP constructs on a language level. An ability to write type-safe code, even with existing limitations of the type system,  facilitates a better quality of the code.
 
 ## Tools Used
 
